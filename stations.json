@@ -27,6 +27,13 @@
               "sv" : "Väg 28 Kajaani, Kokkosuo",
               "en" : "Road 28 Kajaani, Kokkosuo"
                   }
+          }, {
+            "id" : 12019,
+            "names" : {
+              "fi" : "Tie 4 Oulu, Intiö",
+              "sv" : "Väg 4 Oulu, Intiö",
+              "en" : "Road 4 Oulu, Intiö"
+                  }
           }
       ]
 }

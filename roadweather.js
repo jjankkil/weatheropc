@@ -1,3 +1,13 @@
+/*todo:
+- on startup update weatherDataMap from json data file 
+- add station metadata to OPC UA address space on startup, update once an hour or so
+- take station names from station metadata instead of configuration file
+- add all station data to OPC UA address space instead of just selected data:
+  - first just copy the json structure to UPC UA address space 'as-is'
+  - later improve unit handling, e.g. add custom OPC UA data types
+- make this a module or something...
+*/
+
 /*global require,console,setInterval */
 Error.stackTraceLimit = Infinity;
 
@@ -8,6 +18,7 @@ const stationDataUrl = "https://tie.digitraffic.fi/api/v1/metadata/weather-stati
 const weatherDataUrl = "https://tie.digitraffic.fi/api/v1/data/weather-data/";
 const pollingInterval_s = 180;
 string: language = "fi";
+const weatherDataMap = { };
 
 const unirest = require("unirest");
 async function getRoadWeather(stationId) {
@@ -72,8 +83,6 @@ function extractUsefulRoadData(data, stationName) {
     };
 }
 
-const road_data_map = { };
-
 // a infinite round-robin iterator over the station array
 const next_station  = ((arr) => {
    let counter = arr.length;
@@ -90,8 +99,8 @@ async function update_road_data(stationId, stationName) {
 
     try {
         const data  = await getRoadWeather(stationId);
-        road_data_map[stationId] = extractUsefulRoadData(data, stationName);
-        console.log(`station ${stationId}: `, road_data_map[stationId]);
+        weatherDataMap[stationId] = extractUsefulRoadData(data, stationName);
+        console.log(`station ${stationId}: `, weatherDataMap[stationId]);
         return data;
     }
     catch(err) {
@@ -106,7 +115,7 @@ async function update_data() {
     //  await update_road_data(station);
 
     for (let station of weatherStations.stations) {
-        currStation = road_data_map[station.id];
+        currStation = weatherDataMap[station.id];
         prevObservationTime = (typeof currStation !== 'undefined')
             ? currStation["observationTime"]
             : undefined;
@@ -122,7 +131,7 @@ async function update_data() {
         //     console.log(prevObservationTime.getTime() != currStation["observationTime"].getTime());
 
         try  {
-            currStation = road_data_map[station.id];
+            currStation = weatherDataMap[station.id];
             if (typeof prevObservationTime !== 'undefined' &&
                 prevObservationTime.getTime() != currStation["observationTime"].getTime()) {
                 console.log(`updating output file for station ${station.id}`);
@@ -289,7 +298,7 @@ function WindDirectionAsText(degrees, language) {
 }
 
 function extract_road_value(dataType, stationId, property) {
-    const station = road_data_map[stationId];
+    const station = weatherDataMap[stationId];
     if (!station) {
         return opcua.StatusCodes.BadDataUnavailable
     }
