@@ -142,7 +142,10 @@ async function update_data() {
             if (typeof prevObservationTime !== 'undefined' &&
                 prevObservationTime.getTime() != currStation["observationTime"].getTime()) {
                 console.log(`updating output file for station ${station.id}`);
-                fs.writeFileSync(`log/${station.id}_data.json`, JSON.stringify(data) + "\n", {flag: "a"});
+                var year  = dt.getYear() + 1900;
+                var month = ((date.getMonth() + 1) < 10 ? '0' : '') + (date.getMonth() + 1);
+                fs.writeFileSync(`log/RoadWeatherData_${station.id}_${year}${month}.json`, 
+                    JSON.stringify(data) + "\n", {flag: "a"});
             }
         }
         catch(err) {
