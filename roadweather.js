@@ -11,8 +11,10 @@
 /*global require,console,setInterval */
 Error.stackTraceLimit = Infinity;
 
+const utils = require("./weather-utils");
+
 const fs = require("fs");
-const weatherStations = JSON.parse(fs.readFileSync("stations.json"));
+const options = JSON.parse(fs.readFileSync("config.json"));
 
 const stationDataUrl = "https://tie.digitraffic.fi/api/v1/metadata/weather-stations/";
 const weatherDataUrl = "https://tie.digitraffic.fi/api/v1/data/weather-data/";
@@ -25,10 +27,6 @@ const partialWeatherData = { };
 const unirest = require("unirest");
 async function getRoadWeather(stationId) {
     const result = await new Promise((resolve) => {
-        // console.log("getting data from ", 
-        // "https://tie.digitraffic.fi/api/v1/data/weather-data/"
-        // + `${stationId}`);
-
         unirest.get(
             "https://tie.digitraffic.fi/api/v1/data/weather-data/"
             + `${stationId}`
@@ -95,7 +93,7 @@ const next_station  = ((arr) => {
       }
       return arr[counter];
    };
-})(weatherStations);
+})(options.weatherStations);
 
 async function update_road_data(stationId, stationName) {
 
@@ -121,13 +119,13 @@ async function update_data() {
     //  console.log("updating station", station.id);
     //  await update_road_data(station);
 
-    for (let station of weatherStations.stations) {
+    for (let station of options.weatherStations) {
         currStation = partialWeatherData[station.id];
         prevObservationTime = (typeof currStation !== 'undefined')
             ? currStation["observationTime"]
             : undefined;
 
-        console.log(`updating station ${station.id}:`, station.names[language]);
+        console.log(`getting station ${station.id} data (${station.names[language]})`);
         const data = await update_road_data(station.id, station.names[language]);
 
         // console.log(`${station.id} PrevObsTime:`, prevObservationTime);
@@ -140,15 +138,19 @@ async function update_data() {
         try  {
             currStation = partialWeatherData[station.id];
             if (typeof prevObservationTime !== 'undefined' &&
-                prevObservationTime.getTime() != currStation["observationTime"].getTime()) {
-                console.log(`updating output file for station ${station.id}`);
-                var year  = dt.getYear() + 1900;
+                prevObservationTime.getTime() != currStation["observationTime"].getTime() &&
+                options.outputFile.isEnabled ) {
+
+                var date = new Date();
+                var year  = date.getYear() + 1900;
                 var month = ((date.getMonth() + 1) < 10 ? '0' : '') + (date.getMonth() + 1);
-                fs.writeFileSync(`log/RoadWeatherData_${station.id}_${year}${month}.json`, 
-                    JSON.stringify(data) + "\n", {flag: "a"});
+                var fileName = `${options.outputFile.filePath}RoadWeatherData_${station.id}_${year}${month}.json`;
+                console.log(`updating output file '${fileName}' for station ${station.id}`);
+                fs.writeFileSync(fileName, JSON.stringify(data) + "\n", {flag: "a"});
             }
         }
         catch(err) {
+            console.error(err);
         }
     }
 
@@ -185,7 +187,7 @@ function construct_my_address_space(server) {
     //         dataType: "DateTime",
     //         value: {  get: function () { 
     //             //const value = fullWeatherData["dataUpdatedTime"];
-    //             return new opcua.Variant({ opcua.DataType.DateTime, value: fullWeatherData["dataUpdatedTime"] });
+    //             return new opcua.Variant({ type: opcua.DataType.DateTime, value: fullWeatherData["dataUpdatedTime"] });
     //         } },
     //     });
 
@@ -196,7 +198,7 @@ function construct_my_address_space(server) {
     // }
 
     // add partial weather station data
-    for (let station of weatherStations.stations) {
+    for (let station of options.weatherStations) {
         const stationName  =  station.names[language];
         const stationNode = namespace.addFolder(dataRoot,{ browseName: station.id + ", " + stationName });
 
@@ -247,9 +249,9 @@ function construct_my_address_space(server) {
         //     nodeId: `s=${station.id}-WindDirectionText`,
         //     dataType: "String",
         //     value: {  get: function () { 
-        //         tmp = extract_road_value(opcua.DataType.Double, station.id,"windDirection");
-        //         const value = WindDirectionAsText(tmp, language); 
-        //         return new opcua.Variant( { opcua.DataType.String , value: value } );
+        //         tmp = extractPartialDataValue(opcua.DataType.Double, station.id,"windDirection");
+        //         const value = utils.WindDirectionAsText(tmp, language); 
+        //         return new opcua.Variant( { type: opcua.DataType.String , value: 'XX' } );
         //     }},
         // });
 
@@ -280,7 +282,7 @@ function construct_my_address_space(server) {
 //         dataType: "Int16",
 //         value: {  get: function () { 
 //             //const value = fullWeatherData["dataUpdatedTime"];
-//             return new opcua.Variant({ opcua.DataType.Int16, value: sensor["id"] });
+//             return new opcua.Variant({ type: opcua.DataType.Int16, value: sensor["id"] });
 //         } },
 //     });
 // }
@@ -294,89 +296,29 @@ function extractPartialDataValue(dataType, stationId, property) {
     return new opcua.Variant({dataType, value: value });
 }
 
-function WindDirectionAsText(degrees, language) {
-    // remove "bias"
-    while(degrees > 360)
-        degrees -= 360;
-
-    let result = '';
-    if ( (45 - 22.5) <= degrees && degrees < (45 + 22.5) )
-    {
-        result = language == "fi"
-        ? 'koillisesta'
-        : 'NE';
-    }
-    else if ( (90 - 22.5) < degrees && degrees < (90 + 22.5) )
-    {
-      result = language == "fi"
-        ? 'idästä'
-        : 'E';
-    }
-    else if ( (135 - 22.5) < degrees && degrees < (135 + 22.5) )
-    {
-      result = language == "fi"
-        ? 'kaakosta'
-        : 'SE';
-    }
-    else if ( (180 - 22.5) <= degrees && degrees < (180 + 22.5) )
-    {
-      result = (language == "fi")
-        ? 'etelästä'
-        : 'S';
-    }
-    else if ( (225 - 22.5) <= degrees && degrees < (225 + 22.5) )
-    {
-      result = (language == "fi")
-        ? 'lounaasta'
-        : 'SW';
-    }
-    else if ( (270 - 22.5) <= degrees && degrees < (270 + 22.5) )
-    {
-      result = (language == "fi")
-        ? 'lännestä'
-        : 'W';
-    }
-    else if ( (315 - 22.5) <= degrees && degrees < (315 + 22.5) )
-    {
-      result = (language == "fi")
-        ? 'luoteesta'
-        : 'NW';
-    }
-    else
-    {
-      result = (language == "fi")
-        ? 'pohjoisesta'
-        : 'N';
-    }
-
-    return result;
-}
-
 (async () => {
 
     try {
-      
-      const server = new opcua.OPCUAServer({
-         port: 4334, // the port of the listening socket of the servery
-         buildInfo: {
-           productName: "RoadWeather",
-           buildNumber: "1",
-           buildDate: new Date(2020,6,25),
-         }
-      });
-      
-      //console.log(roadWeatherStations);
 
-      await server.initialize();
-      
-      construct_my_address_space(server);
-      
-      await server.start();
-      
-      console.log("Server is now listening ... ( press CTRL+C to stop)");
-      console.log("port ", server.endpoints[0].port);
-      const endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl;
-      console.log(" the primary server endpoint url is ", endpointUrl );
+        if (options.opcUaServer.isEnabled) {
+            const server = new opcua.OPCUAServer({
+                port: 4334, // the port of the listening socket of the servery
+                buildInfo: {
+                productName: "RoadWeather",
+                buildNumber: "1",
+                buildDate: new Date(2020,6,25),
+                }
+            });
+
+            await server.initialize();
+            construct_my_address_space(server);
+            await server.start();
+            
+            console.log("Server is now listening ... ( press CTRL+C to stop)");
+            console.log("port ", server.endpoints[0].port);
+            const endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl;
+            console.log(" the primary server endpoint url is ", endpointUrl );
+        }
       
     }
     catch(err) {

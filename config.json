@@ -1,0 +1,48 @@
+{
+    "opcUaServer": {
+        "isEnabled": true
+    },
+
+    "outputFile": {
+        "isEnabled": true,
+        "filePath": "../../../Data/Weather/new/"
+    },
+
+    "weatherStations": [ {
+        "id" : 12039,
+        "names" : {
+          "fi" : "Tie 4 Oulu, Ritaharju",
+          "sv" : "Väg 4 Oulu, Ritaharju",
+          "en" : "Road 4 Oulu, Ritaharju"
+        }
+      }, {
+        "id" : 14024,
+        "names" : {
+          "fi" : "Tie 29 Tornio, Kyläjoki",
+          "sv" : "Väg 29 Tornio, Kyläjoki",
+          "en" : "Road 29 Tornio, Kyläjoki"
+        }
+      }, {
+        "id" : 14008,
+        "names" : {
+          "fi" : "Tie 4 Tervola, Paakkola",
+          "sv" : "Väg 4 Tervola, Paakkola",
+          "en" : "Road 4 Tervola, Paakkola"
+        }
+      }, {
+        "id" : 12035,
+        "names" : {
+          "fi" : "Tie 28 Kajaani, Kokkosuo",
+          "sv" : "Väg 28 Kajaani, Kokkosuo",
+          "en" : "Road 28 Kajaani, Kokkosuo"
+        }
+      }, {
+        "id" : 12019,
+        "names" : {
+          "fi" : "Tie 4 Oulu, Intiö",
+          "sv" : "Väg 4 Oulu, Intiö",
+          "en" : "Road 4 Oulu, Intiö"
+        }
+      }
+  ]    
+}
