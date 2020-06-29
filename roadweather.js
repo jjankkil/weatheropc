@@ -56,7 +56,8 @@ function strToDateTime(str) {
 
 function findSensorByName(sensorValueArr, name) {
     sensor = sensorValueArr.filter(data => data["name"] === name )[0];
-    //console.log(sensor);
+    if (sensor === undefined)
+        sensor = { name: undefined };
     return sensor;
 }
 
@@ -64,6 +65,11 @@ function extractUsefulRoadData(data, stationName) {
     const stationData = data.weatherStations[0];
     const values = stationData.sensorValues;
     
+    const rainSensor = findSensorByName(values, "SADE");
+    var weatherDescription = rainSensor.sensorValue > 0.0
+        ? rainSensor.sensorValueDescriptionFi + " sade"
+        : rainSensor.sensorValueDescriptionFi;
+
     return  {
         id:                     stationData.id,
         name:                   stationName,
@@ -79,7 +85,7 @@ function extractUsefulRoadData(data, stationName) {
         windDirectionUnit:      findSensorByName(values, "TUULENSUUNTA").sensorUnit,
         humidity:               findSensorByName(values, "ILMAN_KOSTEUS").sensorValue,
         humidityUnit:           findSensorByName(values, "ILMAN_KOSTEUS").sensorUnit,
-        presentWeather:         findSensorByName(values, "SADE").sensorValueDescriptionFi
+        presentWeather:         weatherDescription
     };
 }
 
