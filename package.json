@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "log-timestamp": "^0.3.0",
     "node-opcua": "^2.7.0",
     "unirest": "^0.6.0"
   }

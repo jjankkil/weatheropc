@@ -121,6 +121,21 @@ async function update_road_data(stationId, stationName) {
 }
 
 async function update_data() {
+    
+    require('log-timestamp')(() => { 
+        let date = new Date();
+        const datePart =  
+            `${date.getYear() + 1900}-` + 
+            `${((date.getMonth() + 1) < 10 ? '0' : '') + (date.getMonth() + 1)}-` + 
+            `${(date.getDate() < 10 ? '0' : '') + date.getDate()}`;
+        const timePart = 
+            `${date.getHours()}:` + 
+            `${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}:` + 
+            `${(date.getSeconds() < 10 ? '0' : '') + date.getSeconds()}.` + 
+            `${(date.getMilliseconds() < 100 ? '0' : '') + (date.getMilliseconds() < 10 ? '0' : '') + date.getMilliseconds()}`;
+    return `[${datePart} ${timePart}]`; 
+    });
+
     //  const station = next_station();
     //  console.log("updating station", station.id);
     //  await update_road_data(station);

@@ -4,9 +4,11 @@ Simple OPC UA server which fetches some data from the configured road weather st
 ## preparing the project
 node.js needs to be installed (e.g. sudo apt install nodejs), then:
 
-npm install unirest [--save]
+npm install unirest
 
-npm install node-opcua [--save]
+npm install node-opcua
+
+npm install log-timestamp
 
 ## running the server
 node roadweather.js
