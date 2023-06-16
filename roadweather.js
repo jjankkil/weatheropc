@@ -28,8 +28,9 @@ const unirest = require("unirest");
 async function getRoadWeather(stationId) {
     const result = await new Promise((resolve) => {
         unirest.get(
-            "https://tie.digitraffic.fi/api/v1/data/weather-data/"
+            "https://tie.digitraffic.fi/api/weather/v1/stations/"
             + `${stationId}`
+            + "/data"
         )
         .header("Accept-Encoding", "gzip")
         .end(
@@ -62,7 +63,7 @@ function findSensorByName(sensorValueArr, name) {
 }
 
 function extractUsefulRoadData(data, stationName) {
-    const stationData = data.weatherStations[0];
+    const stationData = data;
     const values = stationData.sensorValues;
     
     const rainSensor = findSensorByName(values, "SADE");
