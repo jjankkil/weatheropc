@@ -15,9 +15,6 @@ const utils = require("./weather-utils");
 
 const fs = require("fs");
 const options = JSON.parse(fs.readFileSync("config.json"));
-
-const stationDataUrl = "https://tie.digitraffic.fi/api/v1/metadata/weather-stations/";
-const weatherDataUrl = "https://tie.digitraffic.fi/api/v1/data/weather-data/";
 const pollingInterval_s = 180;
 string: language = "fi";
 
@@ -27,10 +24,7 @@ const partialWeatherData = { };
 const unirest = require("unirest");
 async function getRoadWeather(stationId) {
     const result = await new Promise((resolve) => {
-        unirest.get(
-            "https://tie.digitraffic.fi/api/weather/v1/stations/"
-            + `${stationId}`
-            + "/data"
+        unirest.get(`https://tie.digitraffic.fi/api/weather/v1/stations/${stationId}/data`
         )
         .header("Accept-Encoding", "gzip")
         .end(
@@ -67,7 +61,7 @@ function extractUsefulRoadData(data, stationName) {
     const values = stationData.sensorValues;
     
     const rainSensor = findSensorByName(values, "SADE");
-    var weatherDescription = rainSensor.sensorValue > 0.0
+    var weatherDescription = rainSensor.value > 0.0
         ? rainSensor.sensorValueDescriptionFi + " sade"
         : rainSensor.sensorValueDescriptionFi;
 
@@ -75,17 +69,17 @@ function extractUsefulRoadData(data, stationName) {
         id:                     stationData.id,
         name:                   stationName,
         currentTime:            new Date(),
-        observationTime:        strToDateTime(stationData.measuredTime),
-        temperature:            findSensorByName(values, "ILMA").sensorValue,
-        temperatureUnit:        findSensorByName(values, "ILMA").sensorUnit,
-        temperatureChange:      findSensorByName(values, "ILMA_DERIVAATTA").sensorValue,
-        temperatureChangeUnit:  findSensorByName(values, "ILMA_DERIVAATTA").sensorUnit,
-        windSpeedAvg:           findSensorByName(values, "KESKITUULI").sensorValue,
-        windSpeedAvgUnit:       findSensorByName(values, "KESKITUULI").sensorUnit,
-        windDirection:          findSensorByName(values, "TUULENSUUNTA").sensorValue,
-        windDirectionUnit:      findSensorByName(values, "TUULENSUUNTA").sensorUnit,
-        humidity:               findSensorByName(values, "ILMAN_KOSTEUS").sensorValue,
-        humidityUnit:           findSensorByName(values, "ILMAN_KOSTEUS").sensorUnit,
+        observationTime:        strToDateTime(stationData.dataUpdatedTime),
+        temperature:            findSensorByName(values, "ILMA").value,
+        temperatureUnit:        findSensorByName(values, "ILMA").unit,
+        temperatureChange:      findSensorByName(values, "ILMA_DERIVAATTA").value,
+        temperatureChangeUnit:  findSensorByName(values, "ILMA_DERIVAATTA").unit,
+        windSpeedAvg:           findSensorByName(values, "KESKITUULI").value,
+        windSpeedAvgUnit:       findSensorByName(values, "KESKITUULI").unit,
+        windDirection:          findSensorByName(values, "TUULENSUUNTA").value,
+        windDirectionUnit:      findSensorByName(values, "TUULENSUUNTA").unit,
+        humidity:               findSensorByName(values, "ILMAN_KOSTEUS").value,
+        humidityUnit:           findSensorByName(values, "ILMAN_KOSTEUS").unit,
         presentWeather:         weatherDescription
     };
 }
@@ -137,10 +131,6 @@ async function update_data() {
     return `[${datePart} ${timePart}]`; 
     });
 
-    //  const station = next_station();
-    //  console.log("updating station", station.id);
-    //  await update_road_data(station);
-
     for (let station of options.weatherStations) {
         currStation = partialWeatherData[station.id];
         prevObservationTime = (typeof currStation !== 'undefined')
@@ -149,13 +139,6 @@ async function update_data() {
 
         console.log(`getting station ${station.id} data (${station.names[language]})`);
         const data = await update_road_data(station.id, station.names[language]);
-
-        // console.log(`${station.id} PrevObsTime:`, prevObservationTime);
-        // console.log(`${station.id} CurrObsTime:`, currStation["observationTime"]);
-        // console.log(typeof prevObservationTime !== 'undefined');
-        // console.log(prevObservationTime != currStation["observationTime"]);
-        // if (prevObservationTime !== undefined)
-        //     console.log(prevObservationTime.getTime() != currStation["observationTime"].getTime());
 
         try  {
             currStation = partialWeatherData[station.id];
@@ -321,14 +304,13 @@ function extractPartialDataValue(dataType, stationId, property) {
 (async () => {
 
     try {
-
         if (options.opcUaServer.isEnabled) {
             const server = new opcua.OPCUAServer({
                 port: 4334, // the port of the listening socket of the servery
                 buildInfo: {
                 productName: "RoadWeather",
                 buildNumber: "1",
-                buildDate: new Date(2020,6,25),
+                buildDate: new Date(),
                 }
             });
 

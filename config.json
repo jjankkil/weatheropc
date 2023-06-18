@@ -1,10 +1,10 @@
 {
     "opcUaServer": {
-        "isEnabled": false
+        "isEnabled": true
     },
 
     "outputFile": {
-        "isEnabled": false,
+        "isEnabled": true,
         "filePath": "./Data/"
     },
 
