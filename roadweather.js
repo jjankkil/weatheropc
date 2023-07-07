@@ -78,8 +78,12 @@ function extractUsefulRoadData(data, stationName) {
         windSpeedAvgUnit:       findSensorByName(values, "KESKITUULI").unit,
         windDirection:          findSensorByName(values, "TUULENSUUNTA").value,
         windDirectionUnit:      findSensorByName(values, "TUULENSUUNTA").unit,
+        windSpeedMax:           findSensorByName(values, "MAKSIMITUULI").value,
+        windSpeedMaxUnit:       findSensorByName(values, "MAKSIMITUULI").unit,
         humidity:               findSensorByName(values, "ILMAN_KOSTEUS").value,
         humidityUnit:           findSensorByName(values, "ILMAN_KOSTEUS").unit,
+        dewPoint:               findSensorByName(values, "KASTEPISTE").value,
+        dewPointUnit:           findSensorByName(values, "KASTEPISTE").unit,
         presentWeather:         weatherDescription
     };
 }
@@ -209,7 +213,7 @@ function construct_my_address_space(server) {
 
         namespace.addVariable({
             componentOf: stationNode,
-            browseName: "ObservationTime",
+            browseName: "Observation time",
             nodeId: `s=${station.id}-ObservationTime`,
             dataType: "DateTime",
             value: {  get: function () { return extractPartialDataValue(opcua.DataType.DateTime, station.id,"observationTime"); } },
@@ -226,7 +230,7 @@ function construct_my_address_space(server) {
 
         namespace.addVariable({
             componentOf: stationNode,
-            browseName: "TemperatureChange",
+            browseName: "Temperature change",
             nodeId: `s=${station.id}-TemperatureChange`,
             dataType: "Double",
             value: {  get: function () { return extractPartialDataValue(opcua.DataType.Double, station.id,"temperatureChange"); } },
@@ -234,7 +238,7 @@ function construct_my_address_space(server) {
 
         namespace.addVariable({
             componentOf: stationNode,
-            browseName: "WindSpeedAvg",
+            browseName: "Wind speed avg",
             nodeId: `s=${station.id}-WindSpeedAvg`,
             dataType: "Double",
             value: {  get: function () { return extractPartialDataValue(opcua.DataType.Double, station.id,"windSpeedAvg"); } },
@@ -242,10 +246,18 @@ function construct_my_address_space(server) {
 
         namespace.addVariable({
             componentOf: stationNode,
-            browseName: "WindDirection",
+            browseName: "Wind direction",
             nodeId: `s=${station.id}-WindDirection`,
             dataType: "Double",
             value: {  get: function () { return extractPartialDataValue(opcua.DataType.Double, station.id,"windDirection"); } },
+        });
+
+        namespace.addVariable({
+            componentOf: stationNode,
+            browseName: "Wind speed max",
+            nodeId: `s=${station.id}-WindSpeedMax`,
+            dataType: "Double",
+            value: {  get: function () { return extractPartialDataValue(opcua.DataType.Double, station.id,"windSpeedMax"); } },
         });
 
         // namespace.addVariable({
@@ -270,7 +282,15 @@ function construct_my_address_space(server) {
 
         namespace.addVariable({
             componentOf: stationNode,
-            browseName: "PresentWeather",
+            browseName: "Dew point",
+            nodeId: `s=${station.id}-DewPoint`,
+            dataType: "Double",
+            value: {  get: function () { return extractPartialDataValue(opcua.DataType.Double, station.id,"dewPoint"); } },
+        });
+
+        namespace.addVariable({
+            componentOf: stationNode,
+            browseName: "Present weather",
             nodeId: `s=${station.id}-PresentWeather`,
             dataType: "String",
             value: {  get: function () { return extractPartialDataValue(opcua.DataType.String, station.id,"presentWeather"); } },
