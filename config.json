@@ -10,11 +10,28 @@
 
     "weatherStations": [ {
         "id" : 12082,
+        "name": "vt4_Oulu_Ritaharju_1",
         "names" : {
           "fi" : "Tie 4 Oulu, Ritaharju",
           "sv" : "Väg 4 Oulu, Ritaharju",
           "en" : "Road 4 Oulu, Ritaharju"
         }
-      }
-  ]    
+        }, {
+        "id": 12019,
+        "name": "vt4_Oulu_Intiö",
+        "names": {
+            "fi": "Tie 4 Oulu, Intiö",
+            "sv": "Väg 4 Oulu, Intiö",
+            "en": "Road 4 Oulu, Intiö"
+            }
+        }, {
+        "id": 12083,
+        "name": "vt4_Oulu_Haukipudas",
+        "names": {
+            "fi": "Tie 4 Oulu, Haukipudas",
+            "sv": "Väg 4 Oulu, Haukipudas",
+            "en": "Road 4 Oulu, Haukipudas"
+            }
+        }
+    ]
 }
