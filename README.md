@@ -1,7 +1,7 @@
 # weatheropc
 Simple OPC UA server which fetches some data from the configured road weather stations and adds it to OPC UA address space, and also logs the data to configured JSONL files. The server uses node-OPCUA and is originally based on Node-OPCUA Weather Station example code, see http://node-opcua.github.io/tutorial/2015/07/05/weather-station.html.
 
-This is a only small learning project, which lacks proper error handling and could use some cleanup and refactoring. Despite this, the code has been running quite reliably on my private Raspberry Pi 1B 512MB since 2020.
+This is a only small learning project, which lacks proper error handling and could use some cleanup and refactoring. Despite this, the code has been running quite reliably on my private Raspberry Pi 1B 512MB since 2020. of course the application has been restarted several times e.g. because of code changes and physically moving the RPi.
 
 ## preparing the project
 node.js needs to be installed (e.g. sudo apt install nodejs), then:
